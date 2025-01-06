@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>지도 보기</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD-kvzjM4Vn4Zlh5O0IcLZIyx1lygpY_fk&callback=initMap" async defer></script>
+    <script>
+        function initMap() {
+            const latitude = parseFloat('{{ latitude }}');  // Flask에서 전달받은 위도
+            const longitude = parseFloat('{{ longitude }}');  // Flask에서 전달받은 경도
+            const location = { lat: latitude, lng: longitude };
+
+            // 지도 생성
+            const map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 15,
+                center: location
+            });
+
+            // 마커 생성
+            const marker = new google.maps.Marker({
+                position: location,
+                map: map,
+                title: 'Selected Image Location'  // 마커 타이틀 설정
+            });
+        }
+    </script>
+</head>
+<body onload="initMap()">
+    <div id="map" style="height: 500px; width: 100%;"></div>
+</body>
+</html>

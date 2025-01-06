@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이미지 분석</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/template.css') }}">
+    <style>
+
+      .main-nav {
+          width: 100%; /* 네비게이션 바 전체 너비를 확장 */
+      }
+      
+      .nav-list {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+          display: flex;
+          justify-content: center; /* 메뉴 아이템을 수평 중앙 정렬 */
+          width: 89%;
+      }
+      
+      .nav-list li {
+          padding: 12px 15px;
+      }
+      
+      .nav-list li a {
+          text-decoration: none;
+          color: black;
+          font-size: 20px;
+          font-weight: bold;
+          padding-top: 40px;
+      }
+      
+      .nav-list li a:hover {
+          color: #ffcc00;
+      }
+      .adjusted-link {
+    padding-top: 10px;
+        }
+        .box {
+            width: 300px;
+            border: 1px solid #000;
+            background-color: #fff;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            display: none; /* 기본적으로 숨김 */
+        }
+        .class-name {
+            color: #000; /* 글자색을 검은색으로 설정 */
+        }
+        .gauge-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #e0e0e0;
+            margin-top: 10px;
+            position: relative;
+        }
+        .gauge-bar-fill {
+            height: 100%;
+            background-color: #76c7c0;
+            width: 0%;
+            text-align: right;
+            padding-right: 5px;
+            box-sizing: border-box;
+            color: #000; /* 글자색을 검은색으로 설정 */
+            line-height: 20px; /* 텍스트를 중앙에 맞춤 */
+        }
+      </style>
+   
+</head>
+<body>
+    
+  <header class="campland-N1">
+    <div class="header-container container-lg">
+        <div class="header-left">
+            <il><a href="/" >
+            <h1 class="header-title">
+                <img src="{{ url_for('static', filename='image/logoB.PNG') }}" alt="로고">
+            </h1>
+            </a></il>
+        </div>
+        <nav class="main-nav"  >
+            <ul class="nav-list">
+                <li><a href="/">Home</a></li>
+                <li><a href="/image" >이미지 유사추천</a></li>
+                <li><a href="/yolo_home">YOLO(BETA)</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+    <!--모달 팝업-->
+
+<!--end 모달 팝업-->
+    <div class="campland-N3">
+        <div class="contents-container">
+            <div class="contents-swiper">
+                <img class="contents-backimg img-pc" src="{{ url_for('static', filename='image/travelic.PNG') }}" alt="PC 메인 비주얼 이미지">
+                <div class="contents-slide-group container-md">
+                    <div class="textset textset-visual">
+                        <h2 class="textset-tit">
+                            <span class="text-deco">YOLO</span><br>여행지 특징 추출
+                        </h2>
+                    </div>
+                    <div class="upload-btn-wrapper">
+                        <div id="drop-area">
+                            <!-- <form id="yoloForm" action="/yolo" method="post" enctype="multipart/form-data" onsubmit="startLoading()">
+                                <input type="file" name="file" accept="image/*"  onchange="showImage(this)">
+                                <button type="submit" id="img-upload">이미지 업로드</button>
+                            </form> -->
+                            <form id="yoloForm" action="/yolo" method="post" enctype="multipart/form-data" onsubmit="startLoading()">
+                                <input type="file" id="real-input" name="file" accept="image/*" style="display: none;" onchange="showImage(this)">
+                                <label for="real-input" id="upload-btn" style="cursor: pointer;">파일 선택</label>
+                                <button type="submit" id="img-upload">이미지 업로드</button>
+                                <img id="uploadedImage" style="display: none;">
+                            </form>
+                            <div style="display: flex;">
+                                <div class="image-box1" style="margin-right: 20px;">
+                                    {% if result_image_1 %}
+                                            <img src="{{ result_image_1 }}" alt="결과 이미지 1">
+                                    {% else %}
+                                        <p>이미지가 없습니다.</p>
+                                    {% endif %}
+                                    
+                                </div>
+                                <div class="box" id="box-1" style="top: 18px;">
+                                    <div class="class-name" id="class-name-1">없음</div>
+                                    <div class="gauge-bar" id="gauge-bar-1">
+                                        <div class="gauge-bar-fill" id="gauge-bar-fill-1"></div>
+                                    </div>
+                                    <div class="class-name" id="class-name-2">없음</div>
+                                    <div class="gauge-bar" id="gauge-bar-2">
+                                        <div class="gauge-bar-fill" id="gauge-bar-fill-2"></div>
+                                    </div>
+                                    <div class="class-name" id="class-name-3">없음</div>
+                                    <div class="gauge-bar" id="gauge-bar-3">
+                                        <div class="gauge-bar-fill" id="gauge-bar-fill-3"></div>
+                                    </div>
+                                </div>
+                        </div>
+
+                        <div id="loading" style="top: 50%;">
+                            <div>
+                                    <img src="{{ url_for('static', filename='image/loading.gif') }}" alt="Loading..." />
+                             </div>
+                             <div id="overlay" style="display: none;"></div>
+                    
+
+                        </div>  
+                    
+                        <script>
+                            async function fetchGaugeValues() {
+                                try {
+                                    const response = await fetch('/gauge-values');
+                                    if (!response.ok) {
+                                        throw new Error('Network response was not ok');
+                                    }
+                                    const data = await response.json();
+                                    console.log('Data received:', data); // 데이터가 제대로 수신되는지 확인
+                    
+                                    let hasData = false;
+                    
+                                    for (let i = 1; i <= 3; i++) {
+                                        const classNameElement = document.getElementById(`class-name-${i}`);
+                                        const gaugeBarElement = document.getElementById(`gauge-bar-${i}`);
+                                        const gaugeBarFillElement = document.getElementById(`gauge-bar-fill-${i}`);
+                    
+                                        if (data[`class_name_${i}`]) {
+                                            classNameElement.innerText = data[`class_name_${i}`];
+                                            classNameElement.style.display = 'block'; // 글씨 표시
+                                            hasData = true;
+                                        } else {
+                                            classNameElement.innerText = '';
+                                            classNameElement.style.display = 'none'; // 글씨 숨김
+                                        }
+                    
+                                        if (data[`value_${i}`] !== undefined && data[`value_${i}`] !== null) {
+                                            gaugeBarElement.style.display = 'block';
+                                            gaugeBarFillElement.style.width = data[`value_${i}`] + '%';
+                                            gaugeBarFillElement.innerText = data[`value_${i}`] + '%';
+                                            hasData = true;
+                                        } else {
+                                            gaugeBarElement.style.display = 'none';
+                                            gaugeBarFillElement.innerText = ''; // 값이 없을 때 텍스트 숨김
+                                        }
+                                    }
+                    
+                                    const boxElement = document.getElementById('box-1');
+                    
+                                    if (hasData) {
+                                        boxElement.style.display = 'block'; // 값이 있을 때 박스 표시
+                                    } else {
+                                        boxElement.style.display = 'none'; // 값이 없을 때 박스 숨김
+                                    }
+                                } catch (error) {
+                                    console.error('Error fetching gauge values:', error);
+                                    initializeGaugeBars(); // 에러가 발생할 때 박스 숨김
+                                }
+                            }
+                    
+                            function initializeGaugeBars() {
+                                for (let i = 1; i <= 3; i++) {
+                                    document.getElementById(`class-name-${i}`).innerText = '';
+                                    document.getElementById(`class-name-${i}`).style.display = 'none';
+                                    document.getElementById(`gauge-bar-${i}`).style.display = 'none';
+                                    document.getElementById(`gauge-bar-fill-${i}`).style.width = '0%';
+                                    document.getElementById(`gauge-bar-fill-${i}`).innerText = '';
+                                }
+                                document.getElementById('box-1').style.display = 'none';
+                            }
+                    
+                            window.onload = () => {
+                                initializeGaugeBars();
+                                fetchGaugeValues();
+                                setInterval(fetchGaugeValues, 1000);
+                            };
+                    
+                            window.onfocus = () => {
+                                initializeGaugeBars();
+                                fetchGaugeValues();
+                            };
+                    
+                            document.addEventListener('visibilitychange', handleVisibilityChange);
+                    
+                            function handleVisibilityChange() {
+                                if (document.visibilityState === 'visible') {
+                                    initializeGaugeBars();
+                                    fetchGaugeValues();
+                                }
+                            }
+
+
+                            function startLoading() {
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('drop-area').classList.add('blur');
+
+            var evtSource = new EventSource('/progress');
+            evtSource.onmessage = function(event) {
+                var progress = parseInt(event.data);
+                if (progress >= 100) {
+                    hideLoading();
+                    evtSource.close();
+                }
+            };
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('drop-area').classList.remove('blur');
+        }
+
+
+        function hideLoading() {
+    document.getElementById('loading').style.display = 'none'; // 로딩 GIF 비활성화
+    document.getElementById('overlay').style.display = 'none'; // 오버레이 비활성화
+    document.getElementById('drop-area').classList.remove('blur'); // 블러 처리 제거
+}
+
+document.getElementById('real-input').onchange = function(e) {
+        if (e.target.files.length > 0) {
+            document.getElementById('upload-btn').textContent = e.target.files[0].name;
+
+        } else {
+            document.getElementById('upload-btn').textContent = '파일 선택';
+        }
+    };
+                        </script>
+                  
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+</body>
+</html>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이미지 분석</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/template.css') }}">
+
+<style>
+
+.main-nav {
+    width: 100%; /* 네비게이션 바 전체 너비를 확장 */
+}
+
+.nav-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center; /* 메뉴 아이템을 수평 중앙 정렬 */
+    width: 89%;
+}
+
+.nav-list li {
+    padding: 12px 15px;
+}
+
+.nav-list li a {
+    text-decoration: none;
+    color: black;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.nav-list li a:hover {
+    color: #ffcc00;
+}
+</style>
+   
+</head>
+<body>
+    
+    <header class="campland-N1">
+        <div class="header-container container-lg">
+            <div class="header-left">
+                <il><a href="/" >
+                    <h1 class="header-title">
+                        <img src="{{ url_for('static', filename='image/logoB.PNG') }}" alt="로고">
+                    </h1>
+                </a></il>
+            </div>
+            <nav class="main-nav"  >
+                <ul class="nav-list">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/image" >이미지 유사추천</a></li>
+                    <li><a href="/yolo_home">YOLO(BETA)</a></li>
+
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <!--모달 팝업-->
+<div class="modal">
+    <div class="modal_popup">
+        <h3></h3>
+        <p></p>
+        <button type="button" class="close_btn">닫기</button>
+    </div>
+</div>
+<!--end 모달 팝업-->
+<div class="modal1">
+    <div class="modal_popup1">
+        <h3></h3>
+        <p></p>
+        <button type="button" class="close_btn1">닫기</button>
+    </div>
+</div>
+<!--end 모달 팝업-->
+<div class="modal2">
+    <div class="modal_popup2">
+        <h3></h3>
+        <p></p>
+        <button type="button" class="close_btn2">닫기</button>
+    </div>
+</div>
+<!--end 모달 팝업-->
+
+    <div class="campland-N3">
+        <div class="contents-container">
+            <div class="contents-swiper">
+                <img class="contents-backimg img-pc" src="{{ url_for('static', filename='image/travelic.PNG') }}" alt="PC 메인 비주얼 이미지">
+                <div class="contents-slide-group container-md">
+                    <div class="textset textset-visual">
+                        <h2 class="textset-tit">
+                            <span class="text-deco">Travelic</span><br>유사 여행지 추천
+                            
+                        </h2>
+                    </div>
+                    <div class="upload-btn-wrapper">                       
+                        <div id="drop-area">
+
+                            <!-- <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data" onsubmit="startLoading()">
+                                <input type="file" id="upload-btn" name="file" accept="image/*" onchange="showImage(this)">
+                                <button type="submit" id="submit-btn">이미지 업로드</button>
+                            </form> -->
+
+                            <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data" onsubmit="startLoading()">
+                                <input type="file" id="real-input" name="file" accept="image/*" style="display: none;" onchange="showImage(this)">
+                                <label for="real-input" id="upload-btn" style="cursor: pointer;">파일 선택</label>
+                                <button type="submit" id="submit-btn">이미지 업로드</button>
+                                <img id="uploadedImage" style="display: none;">
+                            </form>                           
+
+                            <div style="display: flex;">
+                                <div class="image-box1" style="margin-right: 20px;   border-style: ridge;">
+                                    {% if result_image_1 %}
+                                        <a href="/metadata/{{ result_image_1.split('/')[-1] }}" target="_blank">
+                                            <img src="{{ result_image_1 }}" alt="결과 이미지 1">
+                                        </a>
+                                    {% else %}
+                                        <p>이미지가 없습니다.</p>
+                                    {% endif %}
+                                </div>
+                                
+                            
+                                <div class="image-box2" style="margin-right: 20px;   border-style: ridge;  border-radius: 5px;">
+                                    {% if result_image_2 %}
+                                        <a href="/metadata/{{ result_image_2.split('/')[-1] }}" target="_blank">
+                                            <img src="{{ result_image_2 }}" alt="결과 이미지 2">
+                                        </a>
+                                    {% else %}
+                                        <p>이미지가 없습니다.</p>
+                                    {% endif %}
+                                </div>
+                            
+                                <div class="image-box3 " style="  border-style: ridge;  border-radius: 5px;">
+                                    {% if result_image_3 %}
+                                        <a href="/metadata/{{ result_image_3.split('/')[-1] }}" target="_blank">
+                                            <img src="{{ result_image_3 }}" alt="결과 이미지 3">
+                                        </a>
+                                    {% else %}
+                                        <p>이미지가 없습니다.</p>
+
+                                    {% endif %}
+                                </div>
+                                
+                                <main>
+                                    <section>
+                                        <!-- 이미지 URL을 전달하여 메타데이터 요청 -->
+                                        <button type="button" class="modal_btn" id="button1">지역 설명</button>
+                                        <button type="button" class="modal_btn1" id="button2">지역 설명</button>
+                                        <button type="button" class="modal_btn2" id="button3">지역 설명</button>
+                                    </section>
+                                </main>
+                            </div>
+                           
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="loading">
+        <div>
+                <img src="{{ url_for('static', filename='image/loading.gif') }}" alt="Loading..." />
+         </div>
+         <div id="overlay" style="display: none;"></div>
+
+        </div>  
+
+    <script>
+        // 서버에서 메타데이터를 가져오는 함수
+        function getMetadata(imageName) {
+            // AJAX 요청을 보냅니다.
+            fetch('/get_image_metadata_by_name', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    image_name: imageName
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 받은 메타데이터를 출력합니다.
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    // 모달 팝업으로 메타데이터를 보여줍니다.
+                    const modal = document.querySelector('.modal');
+                    const modalContent = modal.querySelector('.modal_popup');
+                    modalContent.querySelector('h3').innerText = data.imagefile_name;
+                    modalContent.querySelector('p').innerText = data.landmark_ex;
+                    modal.style.display = 'block';
+    
+                    // 닫기 버튼 클릭 시 모달을 닫습니다.
+                    modalContent.querySelector('.close_btn').addEventListener('click', function() {
+                        modal.style.display = 'none';
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('서버에서 메타데이터를 가져오는 중 오류가 발생했습니다.');
+            });
+        }
+    
+        // 각 이미지의 지역 설명 버튼에 이벤트 리스너 추가
+        document.getElementById('button1').addEventListener('click', function() {
+            getMetadata('{{ result_image_1.split('/')[-1] if result_image_1 else "" }}');
+        });
+    
+        document.getElementById('button2').addEventListener('click', function() {
+            getMetadata('{{ result_image_2.split('/')[-1] if result_image_2 else "" }}');
+        });
+    
+        document.getElementById('button3').addEventListener('click', function() {
+            getMetadata('{{ result_image_3.split('/')[-1] if result_image_3 else "" }}');
+        });
+
+
+//         function startLoading() {
+//     document.getElementById('loading').style.display = 'block';
+//     var evtSource = new EventSource('/progress');
+//     evtSource.onmessage = function(event) {
+//         var progress = parseInt(event.data);
+//         if (progress >= 100) {
+//             document.getElementById('loading').style.display = 'none';
+//             evtSource.close();
+//         }
+//     };
+// }
+// function startLoading() {
+//     document.getElementById('overlay').style.display = 'block'; // 오버레이 활성화
+//     document.getElementById('loading').style.display = 'block'; // 로딩 GIF 활성화
+//     var evtSource = new EventSource('/progress');
+//     evtSource.onmessage = function(event) {
+//         var progress = parseInt(event.data);
+//         if (progress >= 100) {
+//             document.getElementById('loading').style.display = 'none'; // 로딩 GIF 비활성화
+//             document.getElementById('overlay').style.display = 'none'; // 오버레이 비활성화
+//             evtSource.close();
+//         }
+//     };
+// }
+//이미지 흐리게 하기
+
+function startLoading() {
+    document.getElementById('overlay').style.display = 'block'; // 오버레이 활성화
+    document.getElementById('loading').style.display = 'block'; // 로딩 GIF 활성화
+    document.getElementById('drop-area').classList.add('blur'); // 블러 처리 추가
+
+    var evtSource = new EventSource('/progress');
+    evtSource.onmessage = function(event) {
+        var progress = parseInt(event.data);
+        if (progress >= 100) {
+            hideLoading(); // 로딩 완료 후 UI 업데이트 함수 호출
+            evtSource.close();
+        }
+    };
+}
+
+function hideLoading() {
+    document.getElementById('loading').style.display = 'none'; // 로딩 GIF 비활성화
+    document.getElementById('overlay').style.display = 'none'; // 오버레이 비활성화
+    document.getElementById('drop-area').classList.remove('blur'); // 블러 처리 제거
+}
+
+document.getElementById('real-input').onchange = function(e) {
+        if (e.target.files.length > 0) {
+            document.getElementById('upload-btn').textContent = e.target.files[0].name;
+
+        } else {
+            document.getElementById('upload-btn').textContent = '파일 선택';
+        }
+    };
+
+    </script>
+    
+    
+</body>
+</html>
+
